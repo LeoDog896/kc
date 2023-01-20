@@ -73,16 +73,15 @@ pub enum Op {
 
 impl fmt::Display for Op {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-       match self {
+        match self {
             Op::Add => write!(f, "+"),
             Op::Subtract => write!(f, "-"),
             Op::Multiply => write!(f, "*"),
             Op::Divide => write!(f, "/"),
-            Op::Modulo => write!(f, "%")
-       }
+            Op::Modulo => write!(f, "%"),
+        }
     }
 }
-
 
 fn serialize_expression(expr: &Expr) -> String {
     match expr {
@@ -112,8 +111,8 @@ fn main() -> Result<()> {
 
                 rl.add_history_entry(line.as_str());
                 println!("{}", serialize_expression(&expr));
-            },
-            Err(error) => eprintln!("{}", error)
+            }
+            Err(error) => eprintln!("{}", error),
         }
     }
 }
