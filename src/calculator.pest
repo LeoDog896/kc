@@ -1,8 +1,8 @@
 // No whitespace allowed between digits
-integer = @{ ASCII_DIGIT+ }
+number = @{ (ASCII_DIGIT* ~ "."? ~ ASCII_DIGIT+) | (ASCII_DIGIT+ ~ "."? ~ ASCII_DIGIT*) }
 
 unary_minus = { "-" }
-primary = _{ integer | "(" ~ expr ~ ")" }
+primary = _{ number | "(" ~ expr ~ ")" }
 atom = _{ unary_minus? ~ primary }
 
 bin_op = _{ add | subtract | multiply | divide | modulo }

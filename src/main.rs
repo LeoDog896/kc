@@ -23,7 +23,7 @@ lazy_static::lazy_static! {
 
 #[derive(Debug)]
 pub enum Expr {
-    Integer(i32),
+    Number(f64),
     UnaryMinus(Box<Expr>),
     BinOp {
         lhs: Box<Expr>,
@@ -35,7 +35,7 @@ pub enum Expr {
 pub fn parse_expr(pairs: Pairs<Rule>) -> Expr {
     PRATT_PARSER
         .map_primary(|primary| match primary.as_rule() {
-            Rule::integer => Expr::Integer(primary.as_str().parse::<i32>().unwrap()),
+            Rule::number => Expr::Number(primary.as_str().parse::<f64>().unwrap()),
             Rule::expr => parse_expr(primary.into_inner()),
             rule => unreachable!("Expr::parse expected atom, found {:?}", rule),
         })
