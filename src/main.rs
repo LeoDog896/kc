@@ -2,6 +2,7 @@ use anyhow::Result;
 use pest::iterators::Pairs;
 use pest::pratt_parser::PrattParser;
 use pest::Parser;
+use std::fmt;
 
 #[derive(pest_derive::Parser)]
 #[grammar = "calculator.pest"]
@@ -70,16 +71,49 @@ pub enum Op {
     Modulo,
 }
 
+impl fmt::Display for Op {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+       match self {
+            Op::Add => write!(f, "+"),
+            Op::Subtract => write!(f, "-"),
+            Op::Multiply => write!(f, "*"),
+            Op::Divide => write!(f, "/"),
+            Op::Modulo => write!(f, "%")
+       }
+    }
+}
+
+
+fn serialize_expression(expr: &Expr) -> String {
+    match expr {
+        Expr::Number(n) => n.to_string(),
+        Expr::UnaryMinus(sub_expr) => "-".to_owned() + &serialize_expression(&*sub_expr),
+        Expr::BinOp { lhs, op, rhs } => {
+            format!(
+                "({} {} {})",
+                serialize_expression(&*lhs),
+                &format!("{}", op),
+                &serialize_expression(&*rhs)
+            )
+        }
+    }
+}
+
 fn main() -> Result<()> {
     let mut rl = rustyline::Editor::<()>::new()?;
     loop {
         let line = rl.readline(">> ")?;
-        let mut pairs = CalculatorParser::parse(Rule::equation, &line)?;
-        let parsable_pair = pairs.next().unwrap().into_inner();
-        println!(
-            "Parsed: {:#?}",
-            // inner of expr
-            parse_expr(parsable_pair)
-        );
+        let pairs = CalculatorParser::parse(Rule::equation, &line);
+
+        match pairs {
+            Ok(mut pairs) => {
+                let parsable_pair = pairs.next().unwrap().into_inner();
+                let expr = parse_expr(parsable_pair);
+
+                rl.add_history_entry(line.as_str());
+                println!("{}", serialize_expression(&expr));
+            },
+            Err(error) => eprintln!("{}", error)
+        }
     }
 }
