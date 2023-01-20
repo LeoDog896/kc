@@ -75,10 +75,11 @@ fn main() -> Result<()> {
     loop {
         let line = rl.readline(">> ")?;
         let mut pairs = CalculatorParser::parse(Rule::equation, &line)?;
+        let parsable_pair = pairs.next().unwrap().into_inner();
         println!(
             "Parsed: {:#?}",
             // inner of expr
-            parse_expr(pairs.next().unwrap().into_inner())
+            parse_expr(parsable_pair)
         );
     }
 }
