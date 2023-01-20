@@ -85,7 +85,7 @@ fn main() -> Result<()> {
                         );
                     }
                     Err(e) => {
-                        eprintln!("Parse failed: {:?}", e);
+                        eprintln!("Parse failed: {}", e);
                     }
                 }
             }
