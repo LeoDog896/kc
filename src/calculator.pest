@@ -1,15 +1,19 @@
-// No whitespace allowed between digits
+// No whitespace allowed between digits & variables
 number = @{ (ASCII_DIGIT* ~ "."? ~ ASCII_DIGIT+) | (ASCII_DIGIT+ ~ "."? ~ ASCII_DIGIT*) }
+variable = @{ ASCII_ALPHA }
 
 unary_minus = { "-" }
-primary = _{ number | "(" ~ expr ~ ")" }
-atom = _{ unary_minus? ~ primary }
+factorial = { "!" }
 
-bin_op = _{ add | subtract | multiply | divide | modulo }
+primary = _{ number | variable | "(" ~ expr ~ ")" }
+atom = _{ unary_minus? ~ primary ~ factorial? }
+
+bin_op = _{ add | subtract | multiply | divide | power | modulo }
 	add = { "+" }
 	subtract = { "-" }
 	multiply = { "*" }
 	divide = { "/" }
+    power = { "^" }
 	modulo = { "%" }
 
 expr = { atom ~ (bin_op ~ atom)* }

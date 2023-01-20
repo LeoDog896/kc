@@ -18,6 +18,7 @@ lazy_static::lazy_static! {
             // Addition and subtract have equal precedence
             .op(Op::infix(add, Left) | Op::infix(subtract, Left))
             .op(Op::infix(multiply, Left) | Op::infix(divide, Left) | Op::infix(modulo, Left))
+            .op(Op::infix(power, Left))
             .op(Op::prefix(unary_minus))
     };
 }
@@ -25,6 +26,7 @@ lazy_static::lazy_static! {
 #[derive(Debug)]
 pub enum Expr {
     Number(f64),
+    Variable(String),
     UnaryMinus(Box<Expr>),
     BinOp {
         lhs: Box<Expr>,
@@ -37,6 +39,7 @@ pub fn parse_expr(pairs: Pairs<Rule>) -> Expr {
     PRATT_PARSER
         .map_primary(|primary| match primary.as_rule() {
             Rule::number => Expr::Number(primary.as_str().parse::<f64>().unwrap()),
+            Rule::variable => Expr::Variable(primary.as_str().to_string()),
             Rule::expr => parse_expr(primary.into_inner()),
             rule => unreachable!("Expr::parse expected atom, found {:?}", rule),
         })
@@ -47,6 +50,7 @@ pub fn parse_expr(pairs: Pairs<Rule>) -> Expr {
                 Rule::multiply => Op::Multiply,
                 Rule::divide => Op::Divide,
                 Rule::modulo => Op::Modulo,
+                Rule::power => Op::Power,
                 rule => unreachable!("Expr::parse expected infix operation, found {:?}", rule),
             };
             Expr::BinOp {
@@ -69,6 +73,7 @@ pub enum Op {
     Multiply,
     Divide,
     Modulo,
+    Power,
 }
 
 impl fmt::Display for Op {
@@ -79,6 +84,7 @@ impl fmt::Display for Op {
             Op::Multiply => write!(f, "*"),
             Op::Divide => write!(f, "/"),
             Op::Modulo => write!(f, "%"),
+            Op::Power => write!(f, "^")
         }
     }
 }
@@ -86,6 +92,7 @@ impl fmt::Display for Op {
 fn serialize_expression(expr: &Expr) -> String {
     match expr {
         Expr::Number(n) => n.to_string(),
+        Expr::Variable(x) => x.to_string(),
         Expr::UnaryMinus(sub_expr) => "-".to_owned() + &serialize_expression(&*sub_expr),
         Expr::BinOp { lhs, op, rhs } => {
             format!(
