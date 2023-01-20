@@ -73,23 +73,12 @@ pub enum Op {
 fn main() -> Result<()> {
     let mut rl = rustyline::Editor::<()>::new()?;
     loop {
-        let readline = rl.readline(">> ");
-        match readline {
-            Ok(line) => {
-                match CalculatorParser::parse(Rule::equation, &line) {
-                    Ok(mut pairs) => {
-                        println!(
-                            "Parsed: {:#?}",
-                            // inner of expr
-                            parse_expr(pairs.next().unwrap().into_inner())
-                        );
-                    }
-                    Err(e) => {
-                        eprintln!("Parse failed: {}", e);
-                    }
-                }
-            }
-            Err(_) => println!("No input"),
-        }
+        let line = rl.readline(">> ")?;
+        let mut pairs = CalculatorParser::parse(Rule::equation, &line)?;
+        println!(
+            "Parsed: {:#?}",
+            // inner of expr
+            parse_expr(pairs.next().unwrap().into_inner())
+        );
     }
 }
