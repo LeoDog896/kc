@@ -1,7 +1,7 @@
+use anyhow::Result;
 use pest::iterators::Pairs;
 use pest::pratt_parser::PrattParser;
 use pest::Parser;
-use std::io::{self, BufRead};
 
 #[derive(pest_derive::Parser)]
 #[grammar = "calculator.pest"]
@@ -70,20 +70,26 @@ pub enum Op {
     Modulo,
 }
 
-fn main() -> io::Result<()> {
-    for line in io::stdin().lock().lines() {
-        match CalculatorParser::parse(Rule::equation, &line?) {
-            Ok(mut pairs) => {
-                println!(
-                    "Parsed: {:#?}",
-                    // inner of expr
-                    parse_expr(pairs.next().unwrap().into_inner())
-                );
+fn main() -> Result<()> {
+    let mut rl = rustyline::Editor::<()>::new()?;
+    loop {
+        let readline = rl.readline(">> ");
+        match readline {
+            Ok(line) => {
+                match CalculatorParser::parse(Rule::equation, &line) {
+                    Ok(mut pairs) => {
+                        println!(
+                            "Parsed: {:#?}",
+                            // inner of expr
+                            parse_expr(pairs.next().unwrap().into_inner())
+                        );
+                    }
+                    Err(e) => {
+                        eprintln!("Parse failed: {:?}", e);
+                    }
+                }
             }
-            Err(e) => {
-                eprintln!("Parse failed: {:?}", e);
-            }
+            Err(_) => println!("No input"),
         }
     }
-    Ok(())
 }
